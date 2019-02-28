@@ -8,13 +8,16 @@ library(gt)
 download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_2.28.19.xlsx",
               destfile = "reg_2019.xlsx",
               mode = "wb")
+download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_03.06.18.xlsx",
+              destfile = "reg_2018.xlsx",
+              mode = "wb")
 
-x_2019 <- read_xlsx("class_enrollment_summary_by_term_2.26.19.xlsx", skip = 3) %>%
+x_2019 <- read_xlsx("reg_2019.xlsx", skip = 3) %>%
   clean_names() %>%
   filter(!is.na(course_name)) %>%
   select(course_title, course_name, u_grad, course_id)
   
-x_2018 <- read_xlsx("class_enrollment_summary_by_term_03.06.18.xlsx", skip = 2) %>%
+x_2018 <- read_xlsx("reg_2018.xlsx", skip = 2) %>%
   clean_names() %>%
   filter(!is.na(course_name)) %>%
   select(course_title, course_name, u_grad, course_id)
