@@ -17,35 +17,53 @@ library(fs)
 ```
 
 ```{r enrollment decreases}
+
+# Download the spring 2019 course enrollment data from the Harvard registrar
 download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_2.28.19.xlsx",
               destfile = "reg_2019.xlsx",
+              # Ensure compatibility with both OS and Windows
               mode = "wb")
+
+# Download the spring 2018 course enrollment data from the Harvard registrar
 download.file("https://registrar.fas.harvard.edu/files/fas-registrar/files/class_enrollment_summary_by_term_03.06.18.xlsx",
               destfile = "reg_2018.xlsx",
               mode = "wb")
 
+# Read in the .xlsx file for 2019 and skip the first three rows to prevent the first three lines of NA values from showing up in dataset
 x_2019 <- read_xlsx("reg_2019.xlsx", skip = 3) %>%
+  # Use janitor library to clean column names
   clean_names() %>%
+  # Filter out courses without names and select the relevant variables
   filter(!is.na(course_name)) %>%
   select(course_title, course_name, u_grad, course_id)
-  
+
+# Read in the .xlsx for 2018, skipping the first two rows of NA values
 x_2018 <- read_xlsx("reg_2018.xlsx", skip = 2) %>%
   clean_names() %>%
   filter(!is.na(course_name)) %>%
   select(course_title, course_name, u_grad, course_id)
 
+# Delete both files that are stored locally
 file_delete("reg_2019.xlsx")
 file_delete("reg_2018.xlsx")
 
+# Merge the two datasets by course ID, which stays constant, and append the year as the suffix to column names
 all <- inner_join(x_2019, x_2018, by = "course_id", suffix = c(".2019", ".2018"))
 
+# Create a gt graphic showing the courses with the greatest decreases in enrollment from spring 2018 to spring 2019
 all %>%
+  # Select for appropriate columns
   select(course_title.2019, course_name.2019, u_grad.2018, u_grad.2019) %>%
+  # Calculate the change in enrollment
   mutate(Change = -(u_grad.2019 - u_grad.2018)) %>%
+  # Order from highest to lowest and take the top 10
   arrange(desc(Change)) %>%
   slice(1:10) %>%
+  # Negative Change to show the negative value
   mutate(Change = -Change) %>%
+  # Call gt to create the table
   gt() %>%
+  # Add a title and source note, and change the labels
   tab_header(title = "Biggest Enrollment Decreases in Spring 2019") %>%
   tab_source_note(
     source_note = "Data from the Harvard Registrar") %>%
@@ -56,13 +74,19 @@ all %>%
 ```
 
 ``` {r new classes}
+
+# Find the classes present in the 2019 dataset that were not in the 2018 dataset, and merge into one dataset by course ID
 new_classes <- anti_join(x_2019, x_2018, by = "course_id")
 
+# Create a second gt graphic showing the new courses with the highest enrollment numbers
 new_classes %>%
   select(-course_id) %>%
+  # Arrange from highest to lowest enrollment and take the top 10 values
   arrange(desc(u_grad)) %>%
   slice(1:10) %>%
+  # Call gt to create the table
   gt() %>%
+  # Add appropriate titles, source-note, and change the column labels
   tab_header(title = "Biggest New Classes in Spring 2019") %>%
   tab_source_note(
     source_note = "Data from the Harvard Registrar") %>%
@@ -70,3 +94,5 @@ new_classes %>%
              "course_name" = "Name",
              "u_grad" = "Enrollment")
 ```
+
+Link to RPubs tables: http://rpubs.com/evelyncai/472664
