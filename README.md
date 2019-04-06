@@ -1,3 +1,3 @@
-# class-2019-02-26
+# Harvard Spring 2019 Enrollment Changes
 
-Course enrollments.
+Dynamically downloads data from the Harvard registrar regarding course enrollment numbers and highlights classes with large changes in enrollment.
